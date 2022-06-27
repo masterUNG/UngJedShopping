@@ -18,7 +18,15 @@ class MyConstant {
 
   static Color primary = const Color(0xffadd500);
   static Color dark = const Color(0xff133c29);
-  static Color light = const Color.fromARGB(255, 219, 232, 165);
+  static Color light = Color.fromARGB(255, 227, 234, 198);
+
+  BoxDecoration mainAppBar() => BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[MyConstant.light, MyConstant.primary],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        ),
+      );
 
   BoxDecoration mainBG() => BoxDecoration(
         gradient: RadialGradient(
