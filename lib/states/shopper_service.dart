@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ungjedshopping/bodys/information_shoper.dart';
+import 'package:ungjedshopping/bodys/manage_product_shoper.dart';
 import 'package:ungjedshopping/bodys/order_shoper.dart';
 import 'package:ungjedshopping/models/user_model.dart';
 import 'package:ungjedshopping/utility/my_api.dart';
@@ -26,11 +27,13 @@ class _ShopperServiceState extends State<ShopperService> {
   var bodys = <Widget>[
     const OrderShoper(),
     const InformationShoper(),
+    const ManageProductShoper(),
   ];
 
   var titles = <String>[
     'My Order',
     'Information',
+    'Manage Product',
   ];
 
   int indexBody = 0;
@@ -112,6 +115,20 @@ class _ShopperServiceState extends State<ShopperService> {
               });
             },
             subTitle: 'Detail Shop',
+          ),
+          Divider(
+            color: MyConstant.dark,
+          ),
+           ShowMenu(
+            iconData: Icons.manage_search,
+            title: titles[2],
+            pressFunc: () {
+              Navigator.pop(context);
+              setState(() {
+                indexBody = 2;
+              });
+            },
+            subTitle: 'Manage Product and Add or Edit',
           ),
           Divider(
             color: MyConstant.dark,
