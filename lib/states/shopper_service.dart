@@ -7,6 +7,7 @@ import 'package:ungjedshopping/bodys/order_shoper.dart';
 import 'package:ungjedshopping/models/user_model.dart';
 import 'package:ungjedshopping/utility/my_api.dart';
 import 'package:ungjedshopping/utility/my_constant.dart';
+import 'package:ungjedshopping/widgets/show_icon_button.dart';
 import 'package:ungjedshopping/widgets/show_image_avatar.dart';
 import 'package:ungjedshopping/widgets/show_image_internet.dart';
 import 'package:ungjedshopping/widgets/show_menu.dart';
@@ -34,6 +35,8 @@ class _ShopperServiceState extends State<ShopperService> {
 
   int indexBody = 0;
 
+  final scaffordKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +60,15 @@ class _ShopperServiceState extends State<ShopperService> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffordKey,
       appBar: AppBar(
+        leading: ShowIconButton(
+          iconData: Icons.menu,
+          pressFunc: () {
+            processFindUserModel();
+            scaffordKey.currentState!.openDrawer();
+          },
+        ),
         title: ShowText(
           label: titles[indexBody],
           textStyle: MyConstant().h2Style(),

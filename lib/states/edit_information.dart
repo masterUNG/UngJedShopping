@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
+import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -30,13 +32,18 @@ class _EditInformationState extends State<EditInformation> {
   TextEditingController addressController = TextEditingController();
   TextEditingController telephoneController = TextEditingController();
   File? file;
-  bool change = false; // false => non Change All
+  bool change = false;
+
+  String? urlImage;
 
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
     nameController.text = userModel!.Name;
+
+    urlImage = userModel!.Picture;
+
     addressController.text = userModel!.Address;
     telephoneController.text = userModel!.Telephone;
   }
@@ -90,6 +97,14 @@ class _EditInformationState extends State<EditInformation> {
               pressFunc: () {
                 if (change) {
                   print('Have Change');
+
+                  if (file == null) {
+                    // no change Image
+                    processEditInformationData();
+                  } else {
+                    // change Image
+                    processUploadImage();
+                  }
                 } else {
                   MyDialog(context: context).normalDialog(
                       title: 'Non Change ?',
@@ -208,5 +223,43 @@ class _EditInformationState extends State<EditInformation> {
         ),
       ],
     );
+  }
+
+  Future<void> processUploadImage() async {
+    String pathApiUpload = 'http://www.program2me.com/api/ungapi/saveShop.php';
+    String nameImage = 'image${Random().nextInt(1000000)}.jpg';
+
+    Map<String, dynamic> map = {};
+    map['file'] = await MultipartFile.fromFile(
+      file!.path,
+      filename: nameImage,
+    );
+
+    FormData formData = FormData.fromMap(map);
+    await Dio()
+        .post(
+      pathApiUpload,
+      data: formData,
+    )
+        .then((value) {
+      urlImage = 'http://www.program2me.com/api/ungapi/shop/$nameImage';
+      print('urlImage ==>> $urlImage');
+      processEditInformationData();
+    });
+  }
+
+  Future<void> processEditInformationData() async {
+    String name = nameController.text;
+    String address = addressController.text;
+    String telephone = telephoneController.text;
+
+    print(
+        'name ==> $name, address ==>$address, telephone ==> $telephone, urlImage = $urlImage');
+
+    String path =
+        'http://www.program2me.com/api/ungapi/editUserWhereId.php?Code=${userModel!.Code}&Name=$name&Address=$address&Telephone=$telephone&Picture=$urlImage';
+    await Dio().get(path).then((value) {
+      Navigator.pop(context);
+    });
   }
 }
