@@ -1,4 +1,5 @@
 class MyCalculate {
+
   List<String> changeStringToArray({required String string}) {
     var results = <String>[];
 
@@ -7,7 +8,6 @@ class MyCalculate {
     for (var i = 0; i < results.length; i++) {
       results[i] = results[i].trim();
     }
-
     return results;
   }
 }

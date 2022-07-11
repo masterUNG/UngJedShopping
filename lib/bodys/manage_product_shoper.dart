@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ungjedshopping/models/product_model.dart';
 import 'package:ungjedshopping/states/add_product_shoper.dart';
+import 'package:ungjedshopping/states/edit_product_shoper.dart';
 import 'package:ungjedshopping/utility/my_calculate.dart';
 import 'package:ungjedshopping/utility/my_constant.dart';
 import 'package:ungjedshopping/utility/my_dialog.dart';
@@ -141,7 +142,14 @@ class _ManageProductShoperState extends State<ManageProductShoper> {
                       ShowIconButton(
                         color: const Color.fromARGB(255, 17, 125, 21),
                         iconData: Icons.edit_outlined,
-                        pressFunc: () {},
+                        pressFunc: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditProducShoper(
+                                    productModel: productModels[index]),
+                              )).then((value) => null);
+                        },
                       ),
                       ShowIconButton(
                         color: const Color.fromARGB(255, 226, 34, 20),
