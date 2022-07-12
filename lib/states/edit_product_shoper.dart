@@ -1,5 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:ungjedshopping/models/product_model.dart';
 import 'package:ungjedshopping/utility/my_calculate.dart';
@@ -28,6 +31,10 @@ class _EditProducShoperState extends State<EditProducShoper> {
   TextEditingController unitController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   var urlImages = <String>[];
+  var files = <File?>[];
+
+  bool change = false; // true ==> Have Change
+  String? name, qty, unit, price;
 
   @override
   void initState() {
@@ -38,8 +45,17 @@ class _EditProducShoperState extends State<EditProducShoper> {
     unitController.text = productModel!.unit;
     priceController.text = productModel!.price;
 
+    name = productModel!.name;
+    qty = productModel!.qty;
+    unit = productModel!.unit;
+    price = productModel!.price;
+
     urlImages =
         MyCalculate().changeStringToArray(string: productModel!.picture);
+
+    for (var i = 0; i < urlImages.length; i++) {
+      files.add(null);
+    }
   }
 
   @override
@@ -57,7 +73,10 @@ class _EditProducShoperState extends State<EditProducShoper> {
               height: 16,
             ),
             listImage(boxConstraints),
-            iconAddPicture(),
+            urlImages.length == 4 ? const SizedBox() : iconAddPicture(),
+            const SizedBox(
+              height: 16,
+            ),
             buttonEditProduct(),
             const SizedBox(
               height: 16,
@@ -71,7 +90,13 @@ class _EditProducShoperState extends State<EditProducShoper> {
   Row buttonEditProduct() => createCenter(
         widget: ShowButton(
           label: 'Edit Product',
-          pressFunc: () {},
+          pressFunc: () {
+            if (change) {
+            } else {
+              MyDialog(context: context).normalDialog(
+                  title: 'No Change ?', subTitle: 'Please Edit Something');
+            }
+          },
         ),
       );
 
@@ -86,11 +111,41 @@ class _EditProducShoperState extends State<EditProducShoper> {
             size: 48,
             color: const Color.fromARGB(255, 18, 112, 188),
             iconData: Icons.add_box_outlined,
-            pressFunc: () {},
+            pressFunc: () {
+              MyDialog(context: context).normalDialog(
+                  label: 'Camera',
+                  pressFunc: () {
+                    Navigator.pop(context);
+                    processAddMorePicture(source: ImageSource.camera);
+                  },
+                  label2: 'Gallery',
+                  pressFunc2: () {
+                    Navigator.pop(context);
+                    processAddMorePicture(source: ImageSource.gallery);
+                  },
+                  title: 'Source Image ?',
+                  subTitle: 'Please Tap Camera or Gallery');
+            },
           ),
         ],
       ),
     ));
+  }
+
+  Future<void> processAddMorePicture({required ImageSource source}) async {
+    change = true;
+    var result = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
+    if (result != null) {
+      urlImages.add('');
+      files.add(null);
+      int index = files.length - 1;
+      files[index] = File(result.path);
+      setState(() {});
+    }
   }
 
   ListView listImage(BoxConstraints boxConstraints) {
@@ -110,9 +165,11 @@ class _EditProducShoperState extends State<EditProducShoper> {
                   alignment: Alignment.topCenter,
                   width: boxConstraints.maxWidth * 0.75,
                   height: boxConstraints.maxWidth * 0.75,
-                  child: Image.network(
-                    urlImages[index],
-                  ),
+                  child: files[index] == null
+                      ? Image.network(
+                          urlImages[index],
+                        )
+                      : Image.file(files[index]!),
                 ),
                 Container(
                   width: boxConstraints.maxWidth * 0.3,
@@ -123,7 +180,23 @@ class _EditProducShoperState extends State<EditProducShoper> {
                       ShowIconButton(
                         color: const Color.fromARGB(255, 89, 225, 93),
                         iconData: Icons.edit_outlined,
-                        pressFunc: () {},
+                        pressFunc: () {
+                          MyDialog(context: context).normalDialog(
+                              label: 'Camera',
+                              pressFunc: () {
+                                Navigator.pop(context);
+                                processTakePhoto(
+                                    source: ImageSource.camera, index: index);
+                              },
+                              label2: 'Gallery',
+                              pressFunc2: () {
+                                Navigator.pop(context);
+                                processTakePhoto(
+                                    source: ImageSource.gallery, index: index);
+                              },
+                              title: 'Source Image ?',
+                              subTitle: 'Please Tap Camera or Gallery');
+                        },
                       ),
                       urlImages.length == 1
                           ? const SizedBox()
@@ -134,17 +207,19 @@ class _EditProducShoperState extends State<EditProducShoper> {
                                 MyDialog(context: context).normalDialog(
                                     label: 'Confirm',
                                     pressFunc: () {
+                                      change = true;
                                       Navigator.pop(context);
                                       print(
                                           'urlImages Before delete ==> $urlImages');
                                       print('delete image index ==>> $index');
 
-                                     
-
                                       urlImages.removeAt(index);
+                                      files.removeAt(index);
 
-                                       print(
+                                      print(
                                           'urlImages Alter delete ==> $urlImages');
+
+                                      setState(() {});
                                     },
                                     label2: 'Cancel',
                                     pressFunc2: () {
@@ -171,7 +246,10 @@ class _EditProducShoperState extends State<EditProducShoper> {
         textEditingController: priceController,
         label: 'Price :',
         iconData: Icons.money,
-        changeFunc: (String string) {},
+        changeFunc: (String string) {
+          price = string.trim();
+          change = true;
+        },
       ),
     );
   }
@@ -188,14 +266,20 @@ class _EditProducShoperState extends State<EditProducShoper> {
               width: 120,
               label: 'QTY',
               iconData: Icons.android,
-              changeFunc: (String string) {},
+              changeFunc: (String string) {
+                qty = string;
+                change = true;
+              },
             ),
             ShowForm(
               textEditingController: unitController,
               width: 120,
               label: 'Unit',
               iconData: Icons.ac_unit,
-              changeFunc: (String string) {},
+              changeFunc: (String string) {
+                unit = string.trim();
+                change = true;
+              },
             ),
           ],
         ),
@@ -209,7 +293,10 @@ class _EditProducShoperState extends State<EditProducShoper> {
       textEditingController: nameController,
       label: 'Name :',
       iconData: Icons.fingerprint,
-      changeFunc: (String string) {},
+      changeFunc: (String string) {
+        name = string.trim();
+        change = true;
+      },
     ));
   }
 
@@ -233,5 +320,17 @@ class _EditProducShoperState extends State<EditProducShoper> {
         decoration: MyConstant().mainAppBar(),
       ),
     );
+  }
+
+  Future<void> processTakePhoto(
+      {required ImageSource source, required int index}) async {
+    change = true;
+    var result = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
+    files[index] = File(result!.path);
+    setState(() {});
   }
 }
