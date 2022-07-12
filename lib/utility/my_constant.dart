@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
 class MyConstant {
+  static var urlBanners = <String>[
+    'http://www.program2me.com/api/ungapi/banner/banner1.png',
+    'http://www.program2me.com/api/ungapi/banner/banner2.png',
+    'http://www.program2me.com/api/ungapi/banner/banner3.png',
+  ];
+
   static var typeUsers = <String>[
     'Buyer',
     'Shoper',
